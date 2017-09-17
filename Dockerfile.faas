@@ -1,0 +1,23 @@
+FROM python:alpine
+
+ADD . /httpbin
+
+RUN apk add -U ca-certificates libffi libstdc++ && \
+    apk add --virtual build-deps build-base libffi-dev && \
+    pip install --no-cache-dir /httpbin && \
+    apk del build-deps && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /httpbin/httpbin
+
+ADD ./fwatchdog /usr/bin
+# ADD https://github.com/alexellis/faas/releases/download/0.5.7c-alpha/fwatchdog /usr/bin
+RUN chmod +x /usr/bin/fwatchdog
+
+ENV fprocess="python handler.py"
+ENV cgi_body=true
+ENV cgi_headers=true
+
+HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
+
+CMD ["fwatchdog"]

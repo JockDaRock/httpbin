@@ -24,12 +24,12 @@ from werkzeug.wrappers import BaseResponse
 from werkzeug.http import parse_authorization_header
 from raven.contrib.flask import Sentry
 
-from . import filters
-from .helpers import get_headers, status_code, get_dict, get_request_range, check_basic_auth, check_digest_auth, \
+import filters
+from helpers import get_headers, status_code, get_dict, get_request_range, check_basic_auth, check_digest_auth, \
     secure_cookie, H, ROBOT_TXT, ANGRY_ASCII, parse_multi_value_header, next_stale_after_value, \
     digest_challenge_response
-from .utils import weighted_choice
-from .structures import CaseInsensitiveDict
+from utils import weighted_choice
+from structures import CaseInsensitiveDict
 
 ENV_COOKIES = (
     '_gauges_unique',
@@ -107,7 +107,8 @@ def set_cors_headers(response):
 def view_landing_page():
     """Generates Landing Page."""
     tracking_enabled = 'HTTPBIN_TRACKING' in os.environ
-    return render_template('index.html', tracking_enabled=tracking_enabled)
+    base_url = request.base_url[:len(request.base_url)-1]
+    return render_template('index.html', tracking_enabled=tracking_enabled, base_url=base_url)
 
 
 @app.route('/html')
